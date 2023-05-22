@@ -1,0 +1,11 @@
+Extension:
+
+For the extension, I have implemented a recursive descent style parser that generates an abstract syntax tree, and an interpreter that evaluates the nodes in the AST to execute the instructions. 
+
+The syntax tree is an n-ary tree: each node has a sibling node and a child node. 
+
+I have made a function called tree_output which does a preorder traversal of the tree and saves the node type and relevant value to a char array so that the user can get a textual depiction of how the source code is converted to a tree. Each '[' represents a level, so [INSTRCTS[CAR A]], means a tree with an INSTRCTS node at top, a child node of CAR and an VAR node with the value A at the same level as the CAR node. 
+
+The program attempts to continue building an AST even if it encounters parsing errors by using a simple rule: it keeps on looking for the next right parenthesis. This means that even in the example of the IF statement with some garbage statements in the IF-FALSE or IF-TRUE case, it can interpret successfully. 
+
+

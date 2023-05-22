@@ -1,0 +1,51 @@
+Parsing:
+
+Before I begin parsing, I tokenise the input stream using an enumerated types. I do this so that I can make use of switch statements. 
+
+Reading the assignment brief, it appeared to me to be the most natural way to manage the logic of the program. For example, if one considers a list, it is either a VAR, LITERAL, NIL, or a RETFUNC enclosed by parentheses. Instead of having various if-else statements doing string compares, a switch statement with different token types enables me to deal with the terminal symbols in the NUCLEI grammar in a simple fashion. 
+
+Using the boolean type in C for most of the functions helped in simplifying the testing. I also want to note at this point that the function lengths of some functions are indeed greater than those stipulated in the house-style guidelines, but only due to the fact that I believed that having longer functions lengths in this case helped to facilitate testing. 
+
+For example, encapsulating all of the grammar for IF in one boolean function helped me considerably in testing. It meant that I could pass to the function a stream of tokens and it would let me know whether it was a valid IF statement or not, and if it wasn't, exactly at what stage it ceased to be a valid IF statement. Had I opted to split the function up into subfunctions, I would not be able to pass a whole IF statement into those smaller subfunctions directly and get any response on whether a particular IF statement was valid. 
+
+The testing for this program has been simple as I just pass cases to each function that corresponds to each exit point. For example, for an IF statement, there are several cases when the parser could exit the function, including:
+
+1. The first token is not IF
+2. The second token is not a left parenthesis
+3. No BOOLFUNC is encountered
+4. There is no right parenthesis after the BOOLFUNC
+5. There is no left parenthesis before INSTRCTS
+6. There is no left parenthesis before the second INSTRCTS
+7. The IF statement is valid and it can exit with true
+
+All I have done for the testing is to check those cases. As I write to an Output structure if there is an error, I can check for each of the cases where a function returns false where exactly it returned false. This means that I can be assured of where a particular function will exit given a particular stream of tokens. 
+
+Every function with the exception of Prog, Instrcts and Instrct return boolean values. This means that I can (and have) passed input strings to various functions (after setting up the necessary structures) and can test for example if a stream of tokens constitutes a valid Func, or List, or Set, or Print. 
+
+For the cases of Prog, Instrcts and Instrct, I opted not to use boolean values directly and use the flag 'valid' to check if the program or instruction is still valid.  This flag is updated by the the parser functions where appropriate. For example, the fact that a first token in a stream of tokens does not match an IF statement does not indicate an error in the grammar. It could just mean that the function is not an IF statement. However, if the first token was IF, but the second or later tokens did not match the expected tokens for an IF statement, then it clearly indicates that the program is invalid, and the flag can be set. 
+
+My testing for the parser has been done in a bottom-up manner, starting with those cases where there are terminal symbols, like List, and then moving onto other cases where there are more non-terminal synbols, like ListFunc. 
+
+As I result, I believe that I have tested most of the logic of the grammar quite thoroughly. I note that there has been one exception, that of the token END, where I have not tested this as frequently, but this is because I produce the exact same message if this token is encountered in any function. This token denotes the END of a program and if encountered anywhere except in Instrcts, it indicates that the program prematurely ended. 
+
+Interpreting:
+
+For interpreting, the program primarily makes use of a stack storing lisp pointers. If the program is in interpreter mode and is at a terminal symbol, like VAR or LITERAL or NIL, it pushes the relevant lisp structure onto a stack. As the interpreter then arrives at non-terminal symbols, it can then pop lisp structures off the stack, apply the logic for the given instruction and potentially push new lisp structures on the stack. 
+
+I test the stack and the execution of the instructions through exploring all of the possibilities of valid instructions. For example, for BoolFunc, the following possibilities exist given two variables, A and B. 
+
+If A > B:
+
+1. LESS A B returns a lisp atom containing "0"
+2. GREATER A B returns a lisp atom containing "1"
+3. EQUAL A B returns a lisp atom containing "0"
+
+3 cases each exist for A == B and A < B. There are also states where A or B are not atoms. For testing the interpreter, I examine the output of all of these possible cases, for all of the instructions. 
+
+As the grammar is fairly simple, it is possible to do this due to the number of potential states. For example, I consider cases for IF where either the IF-TRUE or IF-FALSE part of the statement contain garbage. Therefore, I have confidence that the code is well tested. 
+
+With the interpreter, I primarily do black-box testing as it is far easier to do compared to white-box testing. I could not think of a simple way to test the working of the stack in the context of the interpreter without doing black-box testing, because the interpreter is built on top of the parser. For example, if I want to test that the stack works as intended with the expression CONS ('1' (CONS '2' NIL)), I am reliant on the parser to parse any LITERAL and CONS in the right order so that initially '1' is pushed onto the stack, and then '2' and then NIL. It appeared to be the sensible decision to test the correctness of the push and pop operations by passing in various combinations of input (which are limited in number, as discussed before) and asserting that the outputs met expectations.
+
+Extension:
+
+Owing to time pressures, I was unable to do assertion testing on the extension. I have run it through all of the .ncl files you have provided and confirmed that it generates the right output for the interpreter. If I were to complete this task again, I would allocate more time to do the extension, as I did not appreciate that it would take a fairly long period of time to implement an abstract syntax tree parser and interpreter (relative to the non-extension tasks). 
